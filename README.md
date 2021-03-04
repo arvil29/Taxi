@@ -1,4 +1,4 @@
-# taxi
+# Taxi
 
 A new Flutter project.
 
