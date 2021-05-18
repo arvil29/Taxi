@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:uber_clone/Screens/mainScreen.dart';
+import 'package:uber_clone/Screens/homeScreen.dart';
 import 'package:uber_clone/Screens/registrationScreen.dart';
 import 'package:uber_clone/Widgets/progressDialog.dart';
 import 'package:uber_clone/main.dart';
@@ -39,6 +39,8 @@ class LoginScreen extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
+
+              //Column with email, pass, login
               Padding(
                 padding: EdgeInsets.all(30.0),
                 child: Column(
@@ -99,6 +101,7 @@ class LoginScreen extends StatelessWidget {
                         borderRadius: new BorderRadius.circular(24.0),
                       ),
                       onPressed: () {
+                        //check for valid inputs in fields
                         if (!emailTextEditingController.text.contains("@")) {
                           displayToastMessage(
                               "Email address is not valid", context);
@@ -119,7 +122,24 @@ class LoginScreen extends StatelessWidget {
                   Navigator.pushNamedAndRemoveUntil(
                       context, RegistrationScreen.idScreen, (route) => false);
                 },
-                child: Text("No account? Register here"),
+                child: RichText(
+                  text: new TextSpan(
+                    children: <TextSpan>[
+                      new TextSpan(
+                        text: 'New here?',
+                        style: TextStyle(
+                          color: Colors.black,
+                        ),
+                      ),
+                      new TextSpan(
+                        text: ' Register',
+                        style: TextStyle(
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
@@ -128,10 +148,11 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  //authenticate user
+  //get authenticated user's instance
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   void loginAndAuthenticateUser(BuildContext context) async {
+    //loader
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -140,6 +161,7 @@ class LoginScreen extends StatelessWidget {
       },
     );
 
+    //create firebase user after authentication
     final User firebaseUser = (await _firebaseAuth
             .signInWithEmailAndPassword(
                 email: emailTextEditingController.text,
@@ -152,11 +174,12 @@ class LoginScreen extends StatelessWidget {
 
     //if user is found
     if (firebaseUser != null) {
+      //get snapshot of their data
       usersRef.child(firebaseUser.uid).once().then((DataSnapshot snap) {
+        //if snapshot found --> can log in --> go to home screen
         if (snap.value != null) {
-          //go to main screen after logged in
           Navigator.pushNamedAndRemoveUntil(
-              context, MainScreen.idScreen, (route) => false);
+              context, HomeScreen.idScreen, (route) => false);
           displayToastMessage("You are now logged in", context);
         } else {
           Navigator.pop(context);
@@ -174,6 +197,7 @@ class LoginScreen extends StatelessWidget {
     }
   }
 
+  //in case of errors --> display error message
   displayToastMessage(String message, BuildContext context) {
     Fluttertoast.showToast(msg: message);
   }

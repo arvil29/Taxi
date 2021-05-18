@@ -2,11 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:uber_clone/Screens/loginScreen.dart';
-import 'package:uber_clone/Screens/mainScreen.dart';
+import 'package:uber_clone/Screens/homeScreen.dart';
 import 'package:uber_clone/Widgets/progressDialog.dart';
 import 'package:uber_clone/main.dart';
 
-import 'mainScreen.dart';
+import 'homeScreen.dart';
 
 class RegistrationScreen extends StatelessWidget {
   static const String idScreen = "register";
@@ -26,6 +26,8 @@ class RegistrationScreen extends StatelessWidget {
           child: Column(
             children: [
               SizedBox(height: 120.0),
+
+              //logo
               Image(
                 image: AssetImage("images/logo.png"),
                 width: 300.0,
@@ -33,12 +35,15 @@ class RegistrationScreen extends StatelessWidget {
                 alignment: Alignment.center,
               ),
 
+              //title
               SizedBox(height: 30.0),
               Text(
                 "Register as Rider",
                 style: TextStyle(fontSize: 24.0),
                 textAlign: TextAlign.center,
               ),
+
+              //Column with name, email, phone, password, button
               Padding(
                 padding: EdgeInsets.all(30.0),
                 child: Column(
@@ -136,6 +141,7 @@ class RegistrationScreen extends StatelessWidget {
                         borderRadius: new BorderRadius.circular(24.0),
                       ),
                       onPressed: () {
+                        //check for valid inputs in fields
                         if (nameTextEditingController.text.length < 3) {
                           displayToastMessage(
                               "Name must be at least 3 characters", context);
@@ -166,7 +172,24 @@ class RegistrationScreen extends StatelessWidget {
                   Navigator.pushNamedAndRemoveUntil(
                       context, LoginScreen.idScreen, (route) => false);
                 },
-                child: Text("Already have an account? Login here"),
+                child: RichText(
+                  text: new TextSpan(
+                    children: <TextSpan>[
+                      new TextSpan(
+                        text: 'Have an account?',
+                        style: TextStyle(
+                          color: Colors.black,
+                        ),
+                      ),
+                      new TextSpan(
+                        text: ' Login',
+                        style: TextStyle(
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
@@ -175,9 +198,11 @@ class RegistrationScreen extends StatelessWidget {
     );
   }
 
+  //get authenticated user's instance
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   void registerNewUser(BuildContext context) async {
+    //loader
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -186,7 +211,7 @@ class RegistrationScreen extends StatelessWidget {
       },
     );
 
-    //create firebase user
+    //create firebase user with instance
     final User firebaseUser = (await _firebaseAuth
             .createUserWithEmailAndPassword(
                 email: emailTextEditingController.text,
@@ -199,21 +224,24 @@ class RegistrationScreen extends StatelessWidget {
 
     //if user created
     if (firebaseUser != null) {
+      //set child of 'users' in db to uid
       usersRef.child(firebaseUser.uid);
 
+      //store user's data in map
       Map userDataMap = {
         "name": nameTextEditingController.text.trim(),
         "email": emailTextEditingController.text.trim(),
         "phone": phoneTextEditingController.text.trim(),
       };
 
+      //set child of uid in db to user's data
       usersRef.child(firebaseUser.uid).set(userDataMap);
       displayToastMessage(
           "Congratulations! Your account has been created", context);
 
       //go to main screen after registering
       Navigator.pushNamedAndRemoveUntil(
-          context, MainScreen.idScreen, (route) => false);
+          context, HomeScreen.idScreen, (route) => false);
     }
     //if not --> save user info to database
     else {
@@ -222,6 +250,7 @@ class RegistrationScreen extends StatelessWidget {
     }
   }
 
+  //in case of errors --> display error message
   displayToastMessage(String message, BuildContext context) {
     Fluttertoast.showToast(msg: message);
   }
