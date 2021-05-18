@@ -1,4 +1,4 @@
-# uber_clone
+# Taxi
 
 A new Flutter project.
 
